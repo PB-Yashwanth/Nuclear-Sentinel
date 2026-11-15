@@ -1,13 +1,17 @@
-# rag_setup.py
+import os
 import chromadb
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.core import Settings
+from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
 
-print("Loading local HuggingFace embedding model...")
-# Using a fast, free local embedding model that runs perfectly on laptop CPUs
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+print("Connecting to HuggingFace Inference API...")
+# Safely pull the token from the Render environment variables!
+hf_token = os.getenv("HF_TOKEN") 
+
+Settings.embed_model = HuggingFaceInferenceAPIEmbedding(
+    model_name="BAAI/bge-small-en-v1.5",
+    token=hf_token
+)
 Settings.llm = None # We only need retrieval, not generation
 
 print("Initializing ChromaDB...")
