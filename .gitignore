@@ -1,0 +1,14 @@
+# Environments
+venv/
+__pycache__/
+
+# Databases
+nuclearsentinel.db
+mlflow.db
+
+# Heavy Model Weights (Host these on HuggingFace/Kaggle instead)
+*.pth
+*.pkl
+
+# OS Files
+.DS_Store
