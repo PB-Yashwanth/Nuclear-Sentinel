@@ -1,4 +1,4 @@
-# src/triage_agent.py
+import os
 import sqlite3
 import datetime
 from typing import TypedDict
@@ -8,12 +8,16 @@ from langgraph.graph import StateGraph, END
 import chromadb
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
 from llama_index.core import Settings
 
 # --- INITIALIZE EMBEDDING MODEL ---
-# This runs once when the API starts so it doesn't slow down the agent during an alert
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+# Force the live agent to use the cloud API to save 130MB of RAM!
+hf_token = os.environ.get("HF_TOKEN")
+Settings.embed_model = HuggingFaceInferenceAPIEmbedding(
+    model_name="BAAI/bge-small-en-v1.5",
+    token=hf_token
+)
 Settings.llm = None
 
 # --- 1. SQLITE DATABASE SETUP ---

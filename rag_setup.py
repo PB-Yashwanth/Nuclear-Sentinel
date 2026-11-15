@@ -5,14 +5,14 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
 
 print("Connecting to HuggingFace Inference API...")
-# Safely pull the token from the Render environment variables!
-hf_token = os.getenv("HF_TOKEN") 
+# Safely pull the token from Render's environment variables
+hf_token = os.environ.get("HF_TOKEN") 
 
 Settings.embed_model = HuggingFaceInferenceAPIEmbedding(
     model_name="BAAI/bge-small-en-v1.5",
     token=hf_token
 )
-Settings.llm = None # We only need retrieval, not generation
+Settings.llm = None 
 
 print("Initializing ChromaDB...")
 db = chromadb.PersistentClient(path="./chroma_db")
