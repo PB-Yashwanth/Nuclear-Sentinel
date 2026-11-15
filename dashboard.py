@@ -5,8 +5,7 @@ import pandas as pd
 import time
 
 st.set_page_config(page_title="NuclearSentinel RTDAS", layout="wide")
-API_URL = "http://localhost:8080/api/v1/predict" 
-
+API_URL = "http://localhost:8081/api/v1/predict"
 st.title("☢️ NuclearSentinel: Predictive Maintenance")
 st.markdown("**Simulated IGCAR/MAPS PHT (Primary Heat Transport) Sensor Telemetry**")
 
