@@ -1,8 +1,8 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2+cpu
 fastapi
 pydantic
 uvicorn
-torch
 langgraph
 chromadb
 llama-index-core
