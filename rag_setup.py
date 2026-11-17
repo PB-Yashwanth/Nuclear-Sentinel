@@ -1,16 +1,21 @@
 import os
+import sys
 import chromadb
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
+from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 
-print("Connecting to HuggingFace Inference API...")
-# Safely pull the token from Render's environment variables
-hf_token = os.environ.get("HF_TOKEN") 
+print("System Check: Validating Google API Key...")
+google_api_key = os.environ.get("GOOGLE_API_KEY") 
+if not google_api_key:
+    print("❌ FATAL ERROR: GOOGLE_API_KEY is missing.")
+    sys.exit(1)
 
-Settings.embed_model = HuggingFaceInferenceAPIEmbedding(
-    model_name="BAAI/bge-small-en-v1.5",
-    token=hf_token
+print("Connecting to Google Gemini GenAI API...")
+# Using Google's new unified SDK and active model
+Settings.embed_model = GoogleGenAIEmbedding(
+    model_name="gemini-embedding-2-preview", 
+    api_key=google_api_key
 )
 Settings.llm = None 
 

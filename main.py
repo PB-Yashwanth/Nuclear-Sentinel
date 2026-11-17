@@ -1,3 +1,5 @@
+import pandas as pd
+from src.visualization.anomaly_visualizer import generate_alert_image
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import torch
@@ -40,7 +42,7 @@ except Exception as e:
 class SensorPayload(BaseModel):
     sequence: list[list[float]]
 
-# --- 4. PREDICTION & TRIAGE ENDPOINT ---
+# --- 4. PREDICTION, VISUALIZATION & TRIAGE ENDPOINT ---
 @app.post("/api/v1/predict")
 def predict_anomaly(payload: SensorPayload):
     try:
@@ -58,10 +60,28 @@ def predict_anomaly(payload: SensorPayload):
         elif prediction > 0.60:
             alert_status = "WARNING (High) - Degradation Detected"
 
-        # --- LANGGRAPH TRIGGER ---
+        # --- LANGGRAPH & VISUALIZER TRIGGER ---
         report = None
+        alert_image_path = None
+        
         if alert_status != "NORMAL":
-            # If an anomaly is detected, run the LangGraph workflow
+            # 1. Generate OpenCV annotated anomaly chart using incoming sequence data
+            # Mapping the first few dimensions of the sequence array for trend plotting
+            seq_data = payload.sequence
+            dummy_sensor_df = pd.DataFrame({
+                'cycle': list(range(1, len(seq_data) + 1)),
+                'sensor_2': [step[1] if len(step) > 1 else 0.0 for step in seq_data],
+                'sensor_3': [step[2] if len(step) > 2 else 0.0 for step in seq_data]
+            })
+            
+            alert_image_path = generate_alert_image(
+                sensor_df=dummy_sensor_df, 
+                engine_id=1, 
+                cycle=len(seq_data), 
+                severity=alert_status
+            )
+
+            # 2. Run the LangGraph workflow
             state_input = {"alert_tier": alert_status, "probability": prediction}
             agent_result = triage_app.invoke(state_input)
             report = agent_result["final_report"]
@@ -70,6 +90,7 @@ def predict_anomaly(payload: SensorPayload):
             "status": "success",
             "anomaly_probability": round(prediction, 4),
             "alert_tier": alert_status,
+            "annotated_chart": alert_image_path,
             "maintenance_report": report
         }
 
